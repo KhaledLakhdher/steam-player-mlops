@@ -1,0 +1,38 @@
+# Scheduled retraining workflow. Runs in the cloud on a cron — laptop-independent.
+# Assumes this project is the git repo root (how you'd publish it on GitHub).
+name: scheduled-retrain
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"      # every Monday 06:00 UTC
+  workflow_dispatch: {}        # allow manual runs from the Actions tab
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Drift check (informational — logs PSI, never fails the job)
+        run: python -m src.check_drift || true
+
+      - name: Retrain + register model
+        run: python -m src.train
+
+      # NOTE: the CI runner is ephemeral, so the retrained model + MLflow DB live only for this
+      # run. Week 4 persists them (commit data back to the repo, or push to a hosted store) so
+      # retraining actually updates the live service. For now we upload them as run artifacts.
+      - name: Upload model + reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-and-reports
+          path: |
+            models/
+            reports/
