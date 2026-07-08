@@ -129,4 +129,5 @@ Dockerfile           # reproducible serving image
 - **Synthetic generator that can inject drift** — lets the whole pipeline run free/offline *and*
   gives controlled drift to test the monitor against known ground truth.
 
-Full build plan and rationale: [`../MLOPS_PROJECT_ROADMAP.md`](../MLOPS_PROJECT_ROADMAP.md).
+Built as a 4-week project: walking skeleton → registry + validation + Docker → drift detection +
+champion/challenger retraining → CI + dashboard + live collector + deploy.
